@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 
@@ -11,7 +13,7 @@ User = get_user_model()
 # Главная страница
 def index(request):
     post_list = Post.objects.all()
-    paginator = Paginator(post_list, 10)
+    paginator = Paginator(post_list, settings.PAGINATOR_VALUE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -74,6 +76,7 @@ def post_detail(request, post_id):
 
 
 # Страницы создания поста
+@login_required
 def post_create(request):
     if request.method == 'POST':
         form = PostForm(request.POST)
@@ -93,13 +96,14 @@ def post_create(request):
 
 
 # Страница редактирования поста
+@login_required
 def post_edit(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     author = post.author
     is_edit = True
+    form = PostForm(request.POST or None, instance=post)
     if author == request.user:
         if request.method == 'POST':
-            form = PostForm(request.POST, instance=post)
             if form.is_valid():
                 form.save()
 
@@ -113,7 +117,6 @@ def post_edit(request, post_id):
 
             return render(request, 'posts/create_post.html', context)
 
-        form = PostForm(instance=post)
         context = {
             'form': form,
             'is_edit': is_edit,

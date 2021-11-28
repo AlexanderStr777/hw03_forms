@@ -122,3 +122,4 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 # Apps constants
 
 EMPTY_VALUE = '-пусто-'
+PAGINATOR_VALUE = 10
